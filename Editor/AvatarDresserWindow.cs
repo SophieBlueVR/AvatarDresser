@@ -32,7 +32,9 @@ public class AvatarDresserWindow : EditorWindow
     [MenuItem ("Window/SophieBlue/Avatar Dresser")]
     public static void ShowWindow() {
         // Show existing window instance. If one doesn't exist, make one.
-        EditorWindow.GetWindow(typeof(AvatarDresserWindow));
+        var window = EditorWindow.GetWindow(typeof(AvatarDresserWindow));
+        window.titleContent = new GUIContent("Avatar Dresser");
+        window.Show();
     }
 
     private void Header() {
@@ -42,6 +44,7 @@ public class AvatarDresserWindow : EditorWindow
         EditorGUILayout.LabelField("Sophie's Avatar Dresser", styleTitle);
         EditorGUILayout.Space();
 
+        // show the version
         GUIStyle styleVersion = new GUIStyle(GUI.skin.label);
         EditorGUILayout.LabelField(version, styleVersion);
         EditorGUILayout.Space();
@@ -59,11 +62,13 @@ public class AvatarDresserWindow : EditorWindow
         // Toggle for creating animations
         _createAnimations = EditorGUILayout.Toggle("Create Animations", _createAnimations);
 
+        // extra menu stuff if we're in createAnimations mode
         if (_createAnimations) {
             // use the top level menu by default
             if (_avatar && ! _menu) {
                 _menu = _avatar.expressionsMenu;
             }
+            // the target menu for adding a toggle
             _menu = EditorGUILayout.ObjectField(
                 "Menu", _menu, typeof(VRCExpressionsMenu), true) as VRCExpressionsMenu;
         }

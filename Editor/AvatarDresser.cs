@@ -102,114 +102,13 @@ public class AvatarDresser {
         AnimationClip toggleAnimOn = createToggleAnimation(mesh, true);
         AnimationClip toggleAnimOff = createToggleAnimation(mesh, false);
 
-        updateAnimationController(fxController, parameterName, toggleAnimOn, toggleAnimOff);
+        addItemToggleLayer(fxController, parameterName, toggleAnimOn, toggleAnimOff);
 
-        // create the menu parameter, if it doesn't exist
+        // create the menu parameter and toggle
         addBoolParameter(parameterName);
+        addMenuToggle(name, parameterName);
 
         AssetDatabase.SaveAssets();
-    }
-
-    private void updateAnimationController(
-        AnimatorController fxController,
-        string name,
-        AnimationClip enableClip,
-        AnimationClip disableClip) {
-
-        // create the parameter if it doesn't exist
-        if (Array.Find(fxController.parameters, (parameter) => {
-                return parameter.name == name;
-            }) == null) {
-
-            fxController.AddParameter(name, AnimatorControllerParameterType.Bool);
-        }
-
-        Undo.RegisterCompleteObjectUndo(fxController, "Animator Controller");
-
-        // create animator layer
-        AnimatorControllerLayer layer = new AnimatorControllerLayer {
-            defaultWeight = 1.0f,
-            name = name,
-            stateMachine = new AnimatorStateMachine()
-        };
-
-        // our states, one for each of on and off
-        AnimatorStateMachine stateMachine = layer.stateMachine;
-        AnimatorState stateOff = stateMachine.AddState("Disabled");
-        stateOff.motion = disableClip;
-        AnimatorState stateOn = stateMachine.AddState("Enabled");
-        stateOn.motion = enableClip;
-
-        // conditions from off to on
-        AnimatorCondition enableCondition = new AnimatorCondition {
-            mode = AnimatorConditionMode.If,
-            parameter = name
-        };
-
-        AnimatorCondition[] enableConditions = { enableCondition };
-        AnimatorStateTransition enableTransition = new AnimatorStateTransition {
-            conditions = enableConditions,
-            destinationState = stateOn,
-            duration = 0.0f,
-            hasExitTime = true,
-            exitTime = 0.1f
-        };
-        stateOff.AddTransition(enableTransition);
-
-        // conditions from on to off
-        AnimatorCondition disableCondition = new AnimatorCondition {
-            mode = AnimatorConditionMode.IfNot,
-            parameter = name
-        };
-        AnimatorCondition[] disableConditions = { disableCondition };
-        AnimatorStateTransition disableTransition = new AnimatorStateTransition {
-            conditions = disableConditions,
-            destinationState = stateOff,
-            duration = 0.0f,
-            hasExitTime = true,
-            exitTime = 0.1f
-        };
-        stateOn.AddTransition(disableTransition);
-
-        string animatorControllerPath = AssetDatabase.GetAssetPath(fxController);
-        AssetDatabase.AddObjectToAsset(stateMachine, animatorControllerPath);
-        AssetDatabase.AddObjectToAsset(stateOff, animatorControllerPath);
-        AssetDatabase.AddObjectToAsset(stateOn, animatorControllerPath);
-        AssetDatabase.AddObjectToAsset(enableTransition, animatorControllerPath);
-        AssetDatabase.AddObjectToAsset(disableTransition, animatorControllerPath);
-
-        fxController.AddLayer(layer);
-    }
-
-    private void addBoolParameter(string name, float defaultValue = 0.0f, bool saved = true) {
-
-        VRCExpressionParameters parameters = _avatar.expressionParameters;
-
-        // return if it's already there
-        if (parameters.FindParameter(name) != null) {
-            return;
-        }
-        Undo.RegisterCompleteObjectUndo(parameters, "Target Avatar Parameters");
-
-        // copy the list
-        int count = parameters.parameters.Length;
-        VRCExpressionParameters.Parameter[] parameterArray = new VRCExpressionParameters.Parameter[count
- + 1];
-        for (int i = 0; i < count; i++) {
-            parameterArray[i] = parameters.GetParameter(i);
-        }
-
-        // make the new parameter
-        VRCExpressionParameters.Parameter p = new VRCExpressionParameters.Parameter {
-            name = name,
-            valueType = VRCExpressionParameters.ValueType.Bool,
-            defaultValue = defaultValue,
-            saved = saved
-        };
-        parameterArray[count] = p;
-
-        // set the list in the avatar
-        parameters.parameters = parameterArray;
     }
 
     //
@@ -239,10 +138,149 @@ public class AvatarDresser {
         return animationClip;
     }
 
-    //
-    // sourceBone = the bone in question
-    // sourceBones = array of all the article's bones
-    // mesh = the mesh
+
+    // <summary>
+    // Adds an item toggle layer to the given AnimationController
+    // </summary>
+    // <param name="fxController">The FX AnimationController</param>
+    // <param name="name">The name of the new layer</param>
+    // <param name="enableClip">The animation clip to enable the item</param>
+    // <param name="disableClip">The animation clip to disable the item</param>
+    private void addItemToggleLayer(
+        AnimatorController fxController,
+        string name,
+        AnimationClip enableClip,
+        AnimationClip disableClip) {
+
+        // create the parameter if it doesn't exist
+        if (Array.Find(fxController.parameters, (parameter) => {
+                return parameter.name == name;
+            }) == null) {
+
+            fxController.AddParameter(name, AnimatorControllerParameterType.Bool);
+        }
+
+        Undo.RegisterCompleteObjectUndo(fxController, "Animator Controller");
+
+        // create animator layer
+        AnimatorControllerLayer layer = new AnimatorControllerLayer {
+            defaultWeight = 1.0f,
+            name = name,
+            stateMachine = new AnimatorStateMachine()
+        };
+
+        // our states, one for each of on and off
+        AnimatorStateMachine stateMachine = layer.stateMachine;
+        AnimatorState stateOff = stateMachine.AddState("Disabled");
+        stateOff.motion = disableClip;
+        AnimatorState stateOn = stateMachine.AddState("Enabled");
+        stateOn.motion = enableClip;
+
+        // conditions and transition from off to on
+        AnimatorCondition enableCondition = new AnimatorCondition {
+            mode = AnimatorConditionMode.If,
+            parameter = name
+        };
+
+        AnimatorCondition[] enableConditions = { enableCondition };
+        AnimatorStateTransition enableTransition = new AnimatorStateTransition {
+            conditions = enableConditions,
+            destinationState = stateOn,
+            duration = 0.0f,
+            hasExitTime = true,
+            exitTime = 0.1f
+        };
+        stateOff.AddTransition(enableTransition);
+
+        // conditions and transition from on to off
+        AnimatorCondition disableCondition = new AnimatorCondition {
+            mode = AnimatorConditionMode.IfNot,
+            parameter = name
+        };
+        AnimatorCondition[] disableConditions = { disableCondition };
+        AnimatorStateTransition disableTransition = new AnimatorStateTransition {
+            conditions = disableConditions,
+            destinationState = stateOff,
+            duration = 0.0f,
+            hasExitTime = true,
+            exitTime = 0.1f
+        };
+        stateOn.AddTransition(disableTransition);
+
+        // save all the things
+        string animatorControllerPath = AssetDatabase.GetAssetPath(fxController);
+        AssetDatabase.AddObjectToAsset(stateMachine, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(stateOn, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(stateOff, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(enableTransition, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(disableTransition, animatorControllerPath);
+
+        fxController.AddLayer(layer);
+    }
+
+    // <summary>
+    // Add a boolean parameter to the Avatar's parameters
+    // </summary>
+    // <param name="name">parameter name</param>
+    // <param name="defaultValue">default value</param>
+    // <param name="saved">whether this parameter is saved</param>
+    private void addBoolParameter(string name, float defaultValue = 0.0f, bool saved = true) {
+
+        VRCExpressionParameters parameters = _avatar.expressionParameters;
+
+        // return if it's already there
+        if (parameters.FindParameter(name) != null) {
+            return;
+        }
+        Undo.RegisterCompleteObjectUndo(parameters, "Target Avatar Parameters");
+
+        // copy the list
+        int count = parameters.parameters.Length;
+        VRCExpressionParameters.Parameter[] newParameters = new VRCExpressionParameters.Parameter[count
+ + 1];
+        for (int i = 0; i < count; i++) {
+            newParameters[i] = parameters.GetParameter(i);
+        }
+
+        // make the new parameter
+        VRCExpressionParameters.Parameter p = new VRCExpressionParameters.Parameter {
+            name = name,
+            valueType = VRCExpressionParameters.ValueType.Bool,
+            defaultValue = defaultValue,
+            saved = saved
+        };
+        newParameters[count] = p;
+
+        // set the list in the avatar
+        _avatar.expressionParameters.parameters = newParameters;
+    }
+
+    private void addMenuToggle(string name, string parameterName) {
+        // make sure it's not already here
+        foreach (VRCExpressionsMenu.Control control in _menu.controls) {
+            if (control.name == name) {
+                return;
+            }
+        }
+
+        Undo.RegisterCompleteObjectUndo(_menu, "Target Menu");
+
+        VRCExpressionsMenu.Control toggle = new VRCExpressionsMenu.Control {
+            name = name,
+            type = VRCExpressionsMenu.Control.ControlType.Toggle,
+            parameter = new VRCExpressionsMenu.Control.Parameter {
+                name = parameterName
+            }
+        };
+        _menu.controls.Add(toggle);
+    }
+
+    // <summary>
+    // Recurse down the add-on's armature and re-parent it to the avatar's armature
+    // </summary>
+    // <param name="sourceBone">The bone we're currently working on</param>
+    // <param name="sourceBones">Array of all the article's bones</param>
+    // <param name="mesh">the SkinnedMeshRenderer which is the new item</param>
     //
     Transform[] recurseBones(
                 Transform sourceBone,
@@ -393,7 +431,7 @@ public class AvatarDresser {
 
             Undo.SetTransformParent(part.gameObject.transform, _avatar.gameObject.transform, part.name);
 
-            // optionally create animations to toggle this part
+            // optionally create animations to toggle this part on or off
             if (_createAnimations) {
                 createToggleAnimations(part);
             }

@@ -1,5 +1,4 @@
 
 
 
-This project is loosely based on
-https://github.com/artieficial/ApplyAccessories
+This project was initially inspired by https://github.com/artieficial/ApplyAccessories .
