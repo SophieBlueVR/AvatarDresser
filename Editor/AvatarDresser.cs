@@ -4,7 +4,6 @@ AvatarDresser - a simple script to apply an item of clothing to your avatar.
 
 Copyright (c) 2022 SophieBlue
 
-Loosely based on https://github.com/artieficial/ApplyAccessories
 */
 
 using System;
@@ -50,7 +49,11 @@ public class AvatarDresser {
     // sourceBones = array of all the article's bones
     // mesh = the mesh
     //
-    Transform[] recurseBones(Transform sourceBone, Transform[] sourceBones, ref SkinnedMeshRenderer mesh) {
+    Transform[] recurseBones(
+                Transform sourceBone,
+                Transform[] sourceBones,
+                ref SkinnedMeshRenderer mesh) {
+
         string name = sourceBone.gameObject.name;
 
         // if we've seen this one again, skip it
@@ -81,7 +84,8 @@ public class AvatarDresser {
                         // recurse into this bone
                         sourceBones = recurseBones(child, sourceBones, ref mesh);
                         if (sourceBones[sc].parent == sourceBone) {
-                            Undo.SetTransformParent(child, targetBone, sourceBone.gameObject.name);
+                            // parent this child to our target bone
+                            Undo.SetTransformParent(child, targetBone, name);
                         }
                     }
                 }
@@ -94,14 +98,10 @@ public class AvatarDresser {
 
         // okay... probably it's reasonably parented then
         else if (targetBones.TryGetValue(sourceBone.parent.gameObject.name, out targetBone)) {
-            //Debug.Log("Bone " + name + " parenting to " + targetBone.gameObject.name);
+            Debug.Log("Bone " + name + " parenting to " + targetBone.gameObject.name);
 
             // set the bone's parent to the *armature* bone
-            sourceBone.parent = targetBone;
-
-            // reassign the bone
-            int s = Array.FindIndex(sourceBones, x => x == sourceBone);
-            sourceBones[s] = sourceBone;
+            Undo.SetTransformParent(sourceBone, targetBone, sourceBone.gameObject.name);
 
             // recurse down into each child bone
             foreach (Transform child in sourceBone) {
@@ -111,11 +111,17 @@ public class AvatarDresser {
                     sourceBones = recurseBones(child, sourceBones, ref mesh);
                 }
             }
+
+            // reassign the bone
+            int s = Array.FindIndex(sourceBones, x => x == sourceBone);
+            sourceBones[s] = sourceBone;
         }
 
         // bones we don't have in the armature we'd have to just bail out on and
         // tell the user they'll need to do something manual
         else {
+            // TODO: see if the bone has already been moved under the armature,
+            // that's totally okay
             Debug.Log("Bone " + name + " not found in armature - handle manually");
         }
 
@@ -125,16 +131,18 @@ public class AvatarDresser {
 
     [ContextMenu("Apply Clothing")]
     public void Apply() {
-        Undo.IncrementCurrentGroup();
-        Undo.SetCurrentGroupName("Avatar Dresser");
-        int undoGroupIndex = Undo.GetCurrentGroup();
-
         if (_avatar == null) {
-            Debug.LogError("You must assign a target avatar descriptor");
+            Debug.LogError("You must assign a target avatar descriptor!");
+            return;
+        }
+        if (_article == null) {
+            Debug.LogError("You must choose a clothing prefab!");
             return;
         }
 
-        //Debug.Log("Parenting article " + _article.gameObject.name + " to avatar");
+        Undo.IncrementCurrentGroup();
+        Undo.SetCurrentGroupName("Avatar Dresser");
+        int undoGroupIndex = Undo.GetCurrentGroup();
 
         // Create a duplicate article that isn't a prefab and delete the
         // prefab, so it can be returned on undo
@@ -147,11 +155,13 @@ public class AvatarDresser {
         _armature = _avatar.transform.Find("Armature");
         _avatarParameters = _avatar.expressionParameters;
 
-        // find all bones in the armature, make them a hashmap for convenience
+        // find all bones in the armature, make them a dictionary for convenience
         List<Transform> targetBoneList = new List<Transform>(_armature.GetComponentsInChildren<Transform>());
-        for (int t = 0; t < targetBoneList.Count; t++) {
-            targetBones.Add(targetBoneList[t].gameObject.name, targetBoneList[t]);
-        }
+        targetBones.Clear();
+        targetBoneList.ForEach(delegate(Transform bone) {
+            targetBones.Add(bone.gameObject.name, bone);
+        });
+
 
         // Get the article's meshes
         SkinnedMeshRenderer[] articleMeshRenderers =
@@ -166,20 +176,19 @@ public class AvatarDresser {
 
             Transform[] sourceBones = part.bones;
 
-            // Step through the bones in this skinned mesh renderer and recurse
-            // down each of them
+            // recurse through the bones in this mesh
             _visitedBones.Clear();
             for (int s = 0; s < sourceBones.Length; s++) {
-
-                // recurse down the list of bones
                 sourceBones = recurseBones(sourceBones[s], sourceBones, ref part);
             }
 
-            for (int t = 0; t < targetBoneList.Count; t++) {
-                if (targetBoneList[t].parent == _armature && part.rootBone == null) {
-                    //Debug.Log("Assigning root bone to " + targetBoneList[t]);
-                    part.rootBone = targetBoneList[t];
-                }
+            // set the mesh's root bone, if not set
+            if (part.rootBone == null) {
+                targetBoneList.ForEach(delegate(Transform bone) {
+                    if (bone.parent == _armature && part.rootBone == null) {
+                        part.rootBone = bone;
+                    }
+                });
             }
 
             // assign the part's bones

@@ -17,18 +17,17 @@ public class AvatarDresserWindow : EditorWindow
     // Our class with the real logic
     private AvatarDresser avatarDresser = new AvatarDresser();
 
-    [MenuItem ("Window/Avatar Dresser")]
+    [MenuItem ("Window/SophieBlue/Avatar Dresser")]
     public static void ShowWindow() {
         // Show existing window instance. If one doesn't exist, make one.
         EditorWindow.GetWindow(typeof(AvatarDresserWindow));
     }
 
-    // Gives a description regarding what the plugin does
     private void Header() {
         GUIStyle styleTitle = new GUIStyle(GUI.skin.label);
         styleTitle.fontSize = 16;
         styleTitle.margin = new RectOffset(20, 20, 20, 20);
-        EditorGUILayout.LabelField("Avatar Dresser", styleTitle);
+        EditorGUILayout.LabelField("Sophie's Avatar Dresser", styleTitle);
         EditorGUILayout.Space();
 
         GUIStyle styleVersion = new GUIStyle(GUI.skin.label);
@@ -36,7 +35,6 @@ public class AvatarDresserWindow : EditorWindow
         EditorGUILayout.Space();
     }
 
-    // Sets up all the baseline information
     private void MainOptions() {
         // The Avatar
         _avatar = EditorGUILayout.ObjectField(
@@ -44,10 +42,9 @@ public class AvatarDresserWindow : EditorWindow
 
         // The article of clothing
         _article = EditorGUILayout.ObjectField(
-            "Article", _article, typeof(GameObject), true) as GameObject;
+            "Clothing prefab", _article, typeof(GameObject), true) as GameObject;
     }
 
-    // Apply all the options back to the main AvatarDresser class
     private void ApplyOptions() {
         avatarDresser.setAvatar(_avatar);
         avatarDresser.setArticle(_article);
@@ -60,7 +57,7 @@ public class AvatarDresserWindow : EditorWindow
         MainOptions();
         ApplyOptions();
 
-        if (GUILayout.Button("Apply Changes")) {
+        if (GUILayout.Button("Get Dressed!")) {
             avatarDresser.Apply();
         }
 
