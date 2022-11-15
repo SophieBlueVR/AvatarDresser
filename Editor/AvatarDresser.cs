@@ -10,9 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-#if UNITY_EDITOR
 using UnityEditor.Animations;
-#endif
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.SDK3.Avatars.Components;
@@ -20,11 +18,17 @@ using VRC.SDK3.Avatars.ScriptableObjects;
 
 [ExecuteInEditMode]
 public class AvatarDresser {
+    public const string AssetFolderParent = "SophieBlue";
+    public const string AnimationFolder = "_generatedAnimations";
+
     private Transform _armature;
     private VRCExpressionParameters _avatarParameters;
 
+    // data from the user
     private VRCAvatarDescriptor _avatar;
     private GameObject _article;
+    private bool _createAnimations;
+    private VRCExpressionsMenu _menu;
 
     // bones we've already visited
     private HashSet<string> _visitedBones = new HashSet<string>();
@@ -36,12 +40,203 @@ public class AvatarDresser {
         Undo.undoRedoPerformed += AssetDatabase.SaveAssets;
     }
 
+    // setters
     public void setAvatar(VRCAvatarDescriptor avatar) {
         _avatar = avatar;
     }
 
     public void setArticle(GameObject article) {
         _article = article;
+    }
+
+    public void setCreateAnimations(bool status) {
+        _createAnimations = status;
+    }
+
+    public void setMenu(VRCExpressionsMenu menu) {
+        _menu = menu;
+    }
+
+    // find the FX animation controller
+    private AnimatorController getFXController() {
+        VRCAvatarDescriptor.CustomAnimLayer fx = Array.Find(_avatar.baseAnimationLayers,
+            l => l.type == VRCAvatarDescriptor.AnimLayerType.FX);
+        return fx.animatorController as AnimatorController;
+    }
+
+    // <summary>
+    // Ensures the specified asset folder exists under our parent,
+    // creating the path if need be
+    // </summary>
+    private void ensureAssetFolder(string name) {
+        if (! AssetDatabase.IsValidFolder($"Assets/{AssetFolderParent}")) {
+            AssetDatabase.CreateFolder("Assets", AssetFolderParent);
+        }
+        if (! AssetDatabase.IsValidFolder($"Assets/{AssetFolderParent}/{name}")) {
+            AssetDatabase.CreateFolder($"Assets/{AssetFolderParent}", name);
+        }
+    }
+
+    // <summary>
+    // Create toggle animations for this clothing part
+    // </summary>
+    // <param name="mesh">The SkinnedMeshRender which is the clothing item</param>
+    //
+    // the process:
+    //  creates enable and disable animations
+    //  creates an animation layer in the avatar's FX animator
+    //  creates a menu parameter in the avatar's parameters
+    //  creates a toggle in the provided menu
+    private void createToggleAnimations(SkinnedMeshRenderer mesh) {
+        AnimatorController fxController = getFXController();
+        if (! fxController) {
+            Debug.LogWarning("Avatar has no FX controller - not adding toggle animations.");
+            return;
+        }
+        string name = mesh.gameObject.name;
+        string parameterName = $"Outfit/{name}";
+
+        ensureAssetFolder(AnimationFolder);
+
+        // create the animation clips
+        AnimationClip toggleAnimOn = createToggleAnimation(mesh, true);
+        AnimationClip toggleAnimOff = createToggleAnimation(mesh, false);
+
+        updateAnimationController(fxController, parameterName, toggleAnimOn, toggleAnimOff);
+
+        // create the menu parameter, if it doesn't exist
+        addBoolParameter(parameterName);
+
+        AssetDatabase.SaveAssets();
+    }
+
+    private void updateAnimationController(
+        AnimatorController fxController,
+        string name,
+        AnimationClip enableClip,
+        AnimationClip disableClip) {
+
+        // create the parameter if it doesn't exist
+        if (Array.Find(fxController.parameters, (parameter) => {
+                return parameter.name == name;
+            }) == null) {
+
+            fxController.AddParameter(name, AnimatorControllerParameterType.Bool);
+        }
+
+        Undo.RegisterCompleteObjectUndo(fxController, "Animator Controller");
+
+        // create animator layer
+        AnimatorControllerLayer layer = new AnimatorControllerLayer {
+            defaultWeight = 1.0f,
+            name = name,
+            stateMachine = new AnimatorStateMachine()
+        };
+
+        // our states, one for each of on and off
+        AnimatorStateMachine stateMachine = layer.stateMachine;
+        AnimatorState stateOff = stateMachine.AddState("Disabled");
+        stateOff.motion = disableClip;
+        AnimatorState stateOn = stateMachine.AddState("Enabled");
+        stateOn.motion = enableClip;
+
+        // conditions from off to on
+        AnimatorCondition enableCondition = new AnimatorCondition {
+            mode = AnimatorConditionMode.If,
+            parameter = name
+        };
+
+        AnimatorCondition[] enableConditions = { enableCondition };
+        AnimatorStateTransition enableTransition = new AnimatorStateTransition {
+            conditions = enableConditions,
+            destinationState = stateOn,
+            duration = 0.0f,
+            hasExitTime = true,
+            exitTime = 0.1f
+        };
+        stateOff.AddTransition(enableTransition);
+
+        // conditions from on to off
+        AnimatorCondition disableCondition = new AnimatorCondition {
+            mode = AnimatorConditionMode.IfNot,
+            parameter = name
+        };
+        AnimatorCondition[] disableConditions = { disableCondition };
+        AnimatorStateTransition disableTransition = new AnimatorStateTransition {
+            conditions = disableConditions,
+            destinationState = stateOff,
+            duration = 0.0f,
+            hasExitTime = true,
+            exitTime = 0.1f
+        };
+        stateOn.AddTransition(disableTransition);
+
+        string animatorControllerPath = AssetDatabase.GetAssetPath(fxController);
+        AssetDatabase.AddObjectToAsset(stateMachine, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(stateOff, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(stateOn, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(enableTransition, animatorControllerPath);
+        AssetDatabase.AddObjectToAsset(disableTransition, animatorControllerPath);
+
+        fxController.AddLayer(layer);
+    }
+
+    private void addBoolParameter(string name, float defaultValue = 0.0f, bool saved = true) {
+
+        VRCExpressionParameters parameters = _avatar.expressionParameters;
+
+        // return if it's already there
+        if (parameters.FindParameter(name) != null) {
+            return;
+        }
+        Undo.RegisterCompleteObjectUndo(parameters, "Target Avatar Parameters");
+
+        // copy the list
+        int count = parameters.parameters.Length;
+        VRCExpressionParameters.Parameter[] parameterArray = new VRCExpressionParameters.Parameter[count
+ + 1];
+        for (int i = 0; i < count; i++) {
+            parameterArray[i] = parameters.GetParameter(i);
+        }
+
+        // make the new parameter
+        VRCExpressionParameters.Parameter p = new VRCExpressionParameters.Parameter {
+            name = name,
+            valueType = VRCExpressionParameters.ValueType.Bool,
+            defaultValue = defaultValue,
+            saved = saved
+        };
+        parameterArray[count] = p;
+
+        // set the list in the avatar
+        parameters.parameters = parameterArray;
+    }
+
+    //
+    // <summary>
+    // Creates a toggle animation for the article
+    // </summary>
+    // <param name="mesh">the SkinnedMeshRenderer which is the clothing item</param>
+    // <param name="status">true to create enable animation, false for disable</status>
+    //
+    private AnimationClip createToggleAnimation(SkinnedMeshRenderer mesh, bool status) {
+        string name = mesh.gameObject.name;
+        string statusString = status ? "enable" : "disable";
+        string filename = $"Assets/{AssetFolderParent}/{AnimationFolder}/{name}-{statusString}.anim";
+
+        // get or create this clip
+        AnimationClip animationClip = AssetDatabase.LoadAssetAtPath<AnimationClip>(filename);
+        if (! animationClip) {
+            animationClip = new AnimationClip();
+            AssetDatabase.CreateAsset(animationClip, filename);
+        }
+
+        // enable or disable in the first keyframe as appropriate
+        Keyframe key = new Keyframe(0.0f, status ? 1.0f : 0.0f);
+        AnimationCurve animationCurve = new AnimationCurve(key);
+        animationClip.SetCurve(name, typeof(GameObject), "m_IsActive", animationCurve);
+
+        return animationClip;
     }
 
     //
@@ -98,7 +293,7 @@ public class AvatarDresser {
 
         // okay... probably it's reasonably parented then
         else if (targetBones.TryGetValue(sourceBone.parent.gameObject.name, out targetBone)) {
-            Debug.Log("Bone " + name + " parenting to " + targetBone.gameObject.name);
+            //Debug.Log("Bone " + name + " parenting to " + targetBone.gameObject.name);
 
             // set the bone's parent to the *armature* bone
             Undo.SetTransformParent(sourceBone, targetBone, sourceBone.gameObject.name);
@@ -121,8 +316,8 @@ public class AvatarDresser {
         // tell the user they'll need to do something manual
         else {
             // TODO: see if the bone has already been moved under the armature,
-            // that's totally okay
-            Debug.Log("Bone " + name + " not found in armature - handle manually");
+            // that's totally okay, otherwise we may need to alert about these:
+            //Debug.Log("Bone " + name + " not found in armature - you may have to handle it manually");
         }
 
         return sourceBones;
@@ -146,6 +341,7 @@ public class AvatarDresser {
 
         // Create a duplicate article that isn't a prefab and delete the
         // prefab, so it can be returned on undo
+        string articleName = _article.gameObject.name;
         GameObject article = UnityEngine.Object.Instantiate(_article);
         Undo.RegisterCreatedObjectUndo(article, "Article");
         Undo.DestroyObjectImmediate(_article);
@@ -167,7 +363,8 @@ public class AvatarDresser {
         SkinnedMeshRenderer[] articleMeshRenderers =
             _article.GetComponentsInChildren<SkinnedMeshRenderer>();
 
-        // find each of the skinned mesh renderers in this article
+        // We're dealing with a prefab that contains armature and skinned mesh renderers,
+        // so we'll find each of the meshes and apply them to the avatar
         for (int a = 0; a < articleMeshRenderers.Length; a++) {
             SkinnedMeshRenderer part = articleMeshRenderers[a];
             Undo.RecordObject(part.gameObject, "Article");
@@ -191,11 +388,15 @@ public class AvatarDresser {
                 });
             }
 
-            // assign the part's bones
+            // assign this part's updated bones
             part.bones = sourceBones;
 
-            Undo.SetTransformParent(part.gameObject.transform,
-                _avatar.gameObject.transform, part.name);
+            Undo.SetTransformParent(part.gameObject.transform, _avatar.gameObject.transform, part.name);
+
+            // optionally create animations to toggle this part
+            if (_createAnimations) {
+                createToggleAnimations(part);
+            }
         }
 
         Undo.DestroyObjectImmediate(_article);

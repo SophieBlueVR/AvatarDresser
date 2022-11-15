@@ -1,3 +1,11 @@
+/*
+
+AvatarDresser - a simple script to apply an item of clothing to your avatar.
+
+Copyright (c) 2022 SophieBlue
+
+*/
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,11 +19,15 @@ public class AvatarDresserWindow : EditorWindow
     private String version = "v0.1.0";
     private Vector2 scroll;
 
+    // data from the user
     private GameObject _article;
     private VRCAvatarDescriptor _avatar;
+    private bool _createAnimations;
+    private VRCExpressionsMenu _menu;
 
     // Our class with the real logic
     private AvatarDresser avatarDresser = new AvatarDresser();
+
 
     [MenuItem ("Window/SophieBlue/Avatar Dresser")]
     public static void ShowWindow() {
@@ -43,11 +55,25 @@ public class AvatarDresserWindow : EditorWindow
         // The article of clothing
         _article = EditorGUILayout.ObjectField(
             "Clothing prefab", _article, typeof(GameObject), true) as GameObject;
+
+        // Toggle for creating animations
+        _createAnimations = EditorGUILayout.Toggle("Create Animations", _createAnimations);
+
+        if (_createAnimations) {
+            // use the top level menu by default
+            if (_avatar && ! _menu) {
+                _menu = _avatar.expressionsMenu;
+            }
+            _menu = EditorGUILayout.ObjectField(
+                "Menu", _menu, typeof(VRCExpressionsMenu), true) as VRCExpressionsMenu;
+        }
     }
 
     private void ApplyOptions() {
         avatarDresser.setAvatar(_avatar);
         avatarDresser.setArticle(_article);
+        avatarDresser.setCreateAnimations(_createAnimations);
+        avatarDresser.setMenu(_menu);
     }
 
     void OnGUI() {
