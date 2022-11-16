@@ -24,8 +24,11 @@ your FX animator, and add a toggle to the selected menu.
 Install the unitypackage the usual way, from the menu bar in Unity, going
 `Assets` then `Import Package` then `Custom Package...` and selecting the file.
 
-This project was initially inspired by https://github.com/artieficial/ApplyAccessories .
-
 ## License
 
 AvatarDresser is available as-is under MIT. For more information see [LICENSE](/LICENSE.txt).
+
+## Thanks
+
+This project was initially inspired by https://github.com/artieficial/ApplyAccessories .
+Lots of code reference thanks to https://github.com/VRLabs .
