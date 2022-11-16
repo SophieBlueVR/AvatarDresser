@@ -19,10 +19,9 @@ jobs:
       - name: Get Details
         id: details
         run: |
-          echo "version=$(awk '/^v[0-9]/ { print $1; exit }' CHANGELOG.md)" >> $GITHUB_ENV
-          echo 'details<<EOF' >> $GITHUB_OUTPUT
-          grep -zPo -e '(?s)v0.1.0.*?\n-*?\n\n.*?\n\n' CHANGELOG.md | tail -n +3 >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          version=$(awk '/^v[0-9]/ { print $1; exit }' CHANGELOG.md)
+          echo "version=${version}" >> $GITHUB_ENV
+          grep -zPo -e "(?s)${version}.*?\n-*?\n\n.*?\n\n" CHANGELOG.md | tail -n +3 >> .release_notes
 
       - name: Setup Package
         run: |
@@ -45,5 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: "AvatarDresser ${{ env.version }}"
+          body_path: .release_notes
           files: |
             AvatarDresser-${{ env.version }}.unitypackage
