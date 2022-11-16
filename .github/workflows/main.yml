@@ -32,7 +32,7 @@ jobs:
           find Assets/SophieBlue/ -type f -name \*.meta >> metaList
 
       - name: Create package
-      - uses: pCYSl5EDgo/create-unitypackage@master
+        uses: pCYSl5EDgo/create-unitypackage@master
         with:
           package-path: 'AvatarDresser${{ steps.version.outputs.version }}.unitypackage'
           include-files: metaList
