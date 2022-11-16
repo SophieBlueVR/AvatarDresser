@@ -1,4 +1,4 @@
-name: Package Tools
+name: Build and Release
 
 on:
   push:
