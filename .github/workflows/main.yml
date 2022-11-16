@@ -28,7 +28,7 @@ jobs:
           TARGET=Assets/SophieBlue/AvatarDresser
           mkdir -p $TARGET
           ls | grep -v "Assets" | xargs -i{} mv {} $TARGET
-          .github/workflows/generate_meta.sh 89ecda3939344c6a833d3e6d55efd3e5 > Assets/SophieBlue.meta
+          .github/workflows/generate_meta.sh bc846a2331c27846b961e0f9fe107d54 > Assets/SophieBlue.meta
           .github/workflows/generate_meta.sh 35463f4647344b07b00095724986cf0a > Assets/SophieBlue/AvatarDresser.meta
           find Assets -type f -name \*.meta >> metaList
 
