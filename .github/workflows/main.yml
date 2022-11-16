@@ -20,7 +20,9 @@ jobs:
         id: details
         run: |
           echo "version=$(awk '/^v[0-9]/ { print $1; exit }' CHANGELOG.md)" >> $GITHUB_ENV
-          echo "details=$(grep -zPo -e '(?s)v0.1.0.*?\n-*?\n\n.*?\n\n' CHANGELOG.md | tail -n +3)" >> $GITHUB_OUTPUT
+          echo 'details<<EOF' >> $GITHUB_OUTPUT
+          grep -zPo -e '(?s)v0.1.0.*?\n-*?\n\n.*?\n\n' CHANGELOG.md | tail -n +3 >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Setup Package
         run: |
