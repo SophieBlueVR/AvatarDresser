@@ -1,0 +1,60 @@
+name: Package Tools
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check Version
+        id: version
+        run: echo "::set-output name=version::$(awk '/^v[0-9]/ { print $1; exit }' CHANGELOG.md)"
+
+      - name: Get Release Details
+        id: details
+        run: echo "::set-output name=details::$(grep -zPo -e '(?s)v0.1.0.*?\n-*?\n\n.*?\n\n' CHANGELOG.md | tail -n +3)"
+
+      - name: Gather file list
+        run: |
+          find Assets/SophieBlue/ -type f -name \*.meta >> metaList
+
+      - name: Create package
+      - uses: pCYSl5EDgo/create-unitypackage@master
+        with:
+          package-path: 'AvatarDresser${{ steps.version.outputs.version }}.unitypackage'
+          include-files: metaList
+
+      - name: Release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          body: ${{ steps.details.outputs.details }}
+
+      - name: Upload
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: AvatarDresser${{ steps.version.outputs.version }}.unitypackage
+          asset_name: AvatarDresser${{ steps.version.outputs.version }}.unitypackage
+          asset_content_type: application/gzip
