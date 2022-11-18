@@ -64,10 +64,10 @@ public class AvatarDresser {
         return fx.animatorController as AnimatorController;
     }
 
-    // <summary>
-    // Ensures the specified asset folder exists under our parent,
-    // creating the path if need be
-    // </summary>
+    /// <summary>
+    /// Ensures the specified asset folder exists under our parent,
+    /// creating the path if need be
+    /// </summary>
     private void ensureAssetFolder(string name) {
         if (! AssetDatabase.IsValidFolder($"Assets/{AssetFolderParent}")) {
             AssetDatabase.CreateFolder("Assets", AssetFolderParent);
@@ -77,16 +77,16 @@ public class AvatarDresser {
         }
     }
 
-    // <summary>
-    // Create toggle animations for this clothing part
-    // </summary>
-    // <param name="mesh">The SkinnedMeshRender which is the clothing item</param>
-    //
-    // the process:
-    //  creates enable and disable animations
-    //  creates an animation layer in the avatar's FX animator
-    //  creates a menu parameter in the avatar's parameters
-    //  creates a toggle in the provided menu
+    /// <summary>
+    /// Create toggle animations for this clothing part
+    /// </summary>
+    /// <param name="mesh">The SkinnedMeshRender which is the clothing item</param>
+    ///
+    /// the process:
+    ///  creates enable and disable animations
+    ///  creates an animation layer in the avatar's FX animator
+    ///  creates a menu parameter in the avatar's parameters
+    ///  creates a toggle in the provided menu
     private void createToggleAnimations(SkinnedMeshRenderer mesh) {
         AnimatorController fxController = getFXController();
         if (! fxController) {
@@ -111,13 +111,13 @@ public class AvatarDresser {
         AssetDatabase.SaveAssets();
     }
 
-    //
-    // <summary>
-    // Creates a toggle animation for the article
-    // </summary>
-    // <param name="mesh">the SkinnedMeshRenderer which is the clothing item</param>
-    // <param name="status">true to create enable animation, false for disable</status>
-    //
+    ///
+    /// <summary>
+    /// Creates a toggle animation for the article
+    /// </summary>
+    /// <param name="mesh">the SkinnedMeshRenderer which is the clothing item</param>
+    /// <param name="status">true to create enable animation, false for disable</status>
+    ///
     private AnimationClip createToggleAnimation(SkinnedMeshRenderer mesh, bool status) {
         string name = mesh.gameObject.name;
         string statusString = status ? "enable" : "disable";
@@ -139,13 +139,13 @@ public class AvatarDresser {
     }
 
 
-    // <summary>
-    // Adds an item toggle layer to the given AnimationController
-    // </summary>
-    // <param name="fxController">The FX AnimationController</param>
-    // <param name="name">The name of the new layer</param>
-    // <param name="enableClip">The animation clip to enable the item</param>
-    // <param name="disableClip">The animation clip to disable the item</param>
+    /// <summary>
+    /// Adds an item toggle layer to the given AnimationController
+    /// </summary>
+    /// <param name="fxController">The FX AnimationController</param>
+    /// <param name="name">The name of the new layer</param>
+    /// <param name="enableClip">The animation clip to enable the item</param>
+    /// <param name="disableClip">The animation clip to disable the item</param>
     private void addItemToggleLayer(
         AnimatorController fxController,
         string name,
@@ -218,12 +218,12 @@ public class AvatarDresser {
         fxController.AddLayer(layer);
     }
 
-    // <summary>
-    // Add a boolean parameter to the Avatar's parameters
-    // </summary>
-    // <param name="name">parameter name</param>
-    // <param name="defaultValue">default value</param>
-    // <param name="saved">whether this parameter is saved</param>
+    /// <summary>
+    /// Add a boolean parameter to the Avatar's parameters
+    /// </summary>
+    /// <param name="name">parameter name</param>
+    /// <param name="defaultValue">default value</param>
+    /// <param name="saved">whether this parameter is saved</param>
     private void addBoolParameter(string name, float defaultValue = 0.0f, bool saved = true) {
 
         VRCExpressionParameters parameters = _avatar.expressionParameters;
@@ -255,6 +255,11 @@ public class AvatarDresser {
         _avatar.expressionParameters.parameters = newParameters;
     }
 
+    /// <summary>
+    /// Adds a toggle to the menu
+    /// </summary>
+    /// <param name="name">menu item name</param>
+    /// <param name="parameterName">parameter name</param>
     private void addMenuToggle(string name, string parameterName) {
         // make sure it's not already here
         foreach (VRCExpressionsMenu.Control control in _menu.controls) {
@@ -275,13 +280,12 @@ public class AvatarDresser {
         _menu.controls.Add(toggle);
     }
 
-    // <summary>
-    // Recurse down the add-on's armature and re-parent it to the avatar's armature
-    // </summary>
-    // <param name="sourceBone">The bone we're currently working on</param>
-    // <param name="sourceBones">Array of all the article's bones</param>
-    // <param name="mesh">the SkinnedMeshRenderer which is the new item</param>
-    //
+    /// <summary>
+    /// Recurse down the add-on's armature and re-parent it to the avatar's armature
+    /// </summary>
+    /// <param name="sourceBone">The bone we're currently working on</param>
+    /// <param name="sourceBones">Array of all the article's bones</param>
+    /// <param name="mesh">the SkinnedMeshRenderer which is the new item</param>
     Transform[] recurseBones(
                 Transform sourceBone,
                 Transform[] sourceBones,
