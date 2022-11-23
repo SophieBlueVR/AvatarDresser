@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.2
+------
+
+* Move code under a namespace
+
 v0.1.1
 ------
 
