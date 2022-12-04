@@ -17,7 +17,7 @@ using VRC.SDK3.Avatars.ScriptableObjects;
 namespace SophieBlue.AvatarDresser {
     public class AvatarDresserWindow : EditorWindow
     {
-        private String version = "v0.1.0";
+        private String version = "v0.1.3";
         private Vector2 scroll;
 
         // data from the user

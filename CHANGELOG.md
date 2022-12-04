@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v0.1.3
+------
+
+* Set the version number in the code
+* Use TryAdd in case there's weird bones
+
 v0.1.2
 ------
 

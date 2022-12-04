@@ -399,7 +399,7 @@ namespace SophieBlue.AvatarDresser {
             List<Transform> targetBoneList = new List<Transform>(_armature.GetComponentsInChildren<Transform>());
             targetBones.Clear();
             targetBoneList.ForEach(delegate(Transform bone) {
-                targetBones.Add(bone.gameObject.name, bone);
+                targetBones.TryAdd(bone.gameObject.name, bone);
             });
 
 
