@@ -1,11 +1,16 @@
 Changelog
 =========
 
+v0.1.4
+------
+
+* Apparently `Dictionary.TryAdd` is too new for Unity, working around it
+
 v0.1.3
 ------
 
 * Set the version number in the code
-* Use TryAdd in case there's weird bones
+* Use `Dictionary.TryAdd` in case there's weird bones
 
 v0.1.2
 ------
