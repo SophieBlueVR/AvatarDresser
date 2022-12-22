@@ -303,7 +303,9 @@ namespace SophieBlue.AvatarDresser {
 
             // found it?  Great!  We'll reparent this, then recurse
             Transform targetBone;
-            if (targetBones.TryGetValue(name, out targetBone)) {
+
+            //if (targetBones.TryGetValue(name, out targetBone)) {
+            if (BoneMapper.TryFindBone(name, targetBones.Keys(), out targetBone)) {
 
                 // is it the root bone?  Let's properly set this
                 if (mesh.rootBone == sourceBone) {

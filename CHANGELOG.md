@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v0.2.0
+------
+
+* Added a bone matching algorithm to allow accessory and avatar amatures to have
+  varied bone names
+
 v0.1.4
 ------
 

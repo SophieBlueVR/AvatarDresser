@@ -17,7 +17,6 @@ using VRC.SDK3.Avatars.ScriptableObjects;
 namespace SophieBlue.AvatarDresser {
     public class AvatarDresserWindow : EditorWindow
     {
-        private String version = "v0.1.4";
         private Vector2 scroll;
 
         // data from the user
@@ -47,7 +46,7 @@ namespace SophieBlue.AvatarDresser {
 
             // show the version
             GUIStyle styleVersion = new GUIStyle(GUI.skin.label);
-            EditorGUILayout.LabelField(version, styleVersion);
+            EditorGUILayout.LabelField(Version.VERSION, styleVersion);
             EditorGUILayout.Space();
         }
 
