@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.5
+------
+
+* move version to its own file, auto-generate with makefile
+
 v0.1.4
 ------
 
