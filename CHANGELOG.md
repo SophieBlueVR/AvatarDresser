@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.6
+------
+
+* add missing `Version.cs.meta` file
+
 v0.1.5
 ------
 
