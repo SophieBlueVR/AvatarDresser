@@ -9,6 +9,7 @@ Copyright (c) 2022 SophieBlue
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -293,19 +294,22 @@ namespace SophieBlue.AvatarDresser {
                     Transform[] sourceBones,
                     ref SkinnedMeshRenderer mesh) {
 
-            string name = sourceBone.gameObject.name;
+            string sourceBoneName = sourceBone.gameObject.name;
 
             // if we've seen this one again, skip it
-            if (_visitedBones.Contains(name)) {
+            if (_visitedBones.Contains(sourceBoneName)) {
                 return sourceBones;
             }
-            _visitedBones.Add(name);
+            _visitedBones.Add(sourceBoneName);
 
-            // found it?  Great!  We'll reparent this, then recurse
+            //string targetBoneName;
             Transform targetBone;
 
-            //if (targetBones.TryGetValue(name, out targetBone)) {
-            if (BoneMapper.TryFindBone(name, targetBones.Keys(), out targetBone)) {
+            // found it?  Great!  We'll reparent this, then recurse
+            if (BoneMapper.TryFindBone(sourceBoneName, targetBones, out targetBone)) {
+                Debug.Log("mapping bone " + sourceBoneName + " to " + targetBone.gameObject.name);
+
+                //targetBone = targetBones[targetBoneName];
 
                 // is it the root bone?  Let's properly set this
                 if (mesh.rootBone == sourceBone) {
@@ -326,7 +330,7 @@ namespace SophieBlue.AvatarDresser {
                             sourceBones = recurseBones(child, sourceBones, ref mesh);
                             if (sourceBones[sc].parent == sourceBone) {
                                 // parent this child to our target bone
-                                Undo.SetTransformParent(child, targetBone, name);
+                                Undo.SetTransformParent(child, targetBone, sourceBoneName);
                             }
                         }
                     }
@@ -339,10 +343,10 @@ namespace SophieBlue.AvatarDresser {
 
             // okay... probably it's reasonably parented then
             else if (targetBones.TryGetValue(sourceBone.parent.gameObject.name, out targetBone)) {
-                //Debug.Log("Bone " + name + " parenting to " + targetBone.gameObject.name);
+                Debug.Log("Bone " + sourceBoneName + " parenting to " + targetBone.gameObject.name);
 
                 // set the bone's parent to the *armature* bone
-                Undo.SetTransformParent(sourceBone, targetBone, sourceBone.gameObject.name);
+                Undo.SetTransformParent(sourceBone, targetBone, sourceBoneName);
 
                 // recurse down into each child bone
                 foreach (Transform child in sourceBone) {
@@ -363,7 +367,7 @@ namespace SophieBlue.AvatarDresser {
             else {
                 // TODO: see if the bone has already been moved under the armature,
                 // that's totally okay, otherwise we may need to alert about these:
-                //Debug.Log("Bone " + name + " not found in armature - you may have to handle it manually");
+                Debug.Log("Armatures incompatible - bone " + sourceBoneName + " not found");
             }
 
             return sourceBones;
