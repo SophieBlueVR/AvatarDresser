@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.7
+------
+
+* Added a note about scaling to the readme.
+
 v0.1.6
 ------
 

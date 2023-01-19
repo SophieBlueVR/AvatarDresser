@@ -5,7 +5,6 @@ A simple Unity editor tool for adding accessories to a VR Chat avatar.
 
 [![Generic badge](https://img.shields.io/badge/Unity-2019.4.31f1-informational.svg)](https://unity3d.com/unity/whats-new/2019.4.31)
 [![Generic badge](https://img.shields.io/badge/SDK-AvatarSDK3-informational.svg)](https://vrchat.com/home/download)
-[![Generic badge](https://img.shields.io/badge/License-MIT-informational.svg)](https://github.com/VRLabs/World-Constraint/blob/main/LICENSE)
 
 ## Usage
 
@@ -18,6 +17,17 @@ appropriate places, then simply click `Get Dressed!`
 You can also check the box for `Create Animations` - this will create
 appropriate enable/disable animations for your clothing item, add a layer to
 your FX animator, and add a toggle to the selected menu.
+
+### Scaling
+
+A note about scaling - If the asset you are adding is not at the same scale as
+your avatar, you should adjust scaling *before* running the dresser, to be sure
+all armature components match properly.
+
+For example, your avatar is at 1.25 scale but your asset is the standard 1 - in
+the inspector window of the asset's root, set the x, y, and z scaling factors to
+match the avatar's 1.25.  Then you should be able to run the dresser and
+everything will match up fine.
 
 ## Installation
 
