@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.8
+------
+
+* Moved over to the `Tools` menu rather than `Window`.
+
 v0.1.7
 ------
 

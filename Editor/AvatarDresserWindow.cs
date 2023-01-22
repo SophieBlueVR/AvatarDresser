@@ -30,7 +30,7 @@ namespace SophieBlue.AvatarDresser {
         private AvatarDresser avatarDresser = new AvatarDresser();
 
 
-        [MenuItem ("Window/SophieBlue/Avatar Dresser")]
+        [MenuItem ("Tools/SophieBlue/Avatar Dresser")]
         public static void ShowWindow() {
             // Show existing window instance. If one doesn't exist, make one.
             var window = EditorWindow.GetWindow(typeof(AvatarDresserWindow));
