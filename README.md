@@ -31,12 +31,33 @@ everything will match up fine.
 
 ## Installation
 
+There are two methods, pick **only one**:
+
+### UnityPackage
+
 Install the unitypackage the usual way, from the menu bar in Unity, going
-`Assets` then `Import Package` then `Custom Package...` and selecting the file.
+to `Assets` then `Import Package` then `Custom Package...` and selecting the
+file.
+
+### VPM
+
+You can use now [VRChat's VPM tool](https://vcc.docs.vrchat.com/vpm/cli/)!
+First add my [VPM Repository](https://github.com/SophieBlueVR/vpm-repos), and
+then you can simply go to your project directory and type:
+
+```
+vpm add package io.github.SophieBlueVR.AvatarDresser
+```
+
+**NOTE**: I distribute this tool inside the unitypackage for all of my avatar
+assets, so if you use the VPM method you must make sure you *exclude* the
+AvatarDresser when importing another unitypackage, or the two packages will
+conflict, and Unity will be sad.
 
 ## License
 
-AvatarDresser is available as-is under MIT. For more information see [LICENSE](/LICENSE.txt).
+AvatarDresser is available as-is under MIT. For more information see
+[LICENSE](/LICENSE.txt).
 
 ## Thanks
 

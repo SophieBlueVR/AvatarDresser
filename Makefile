@@ -1,5 +1,5 @@
-VERSION = $(shell awk '/^v[0-9]/ {print $$1; exit }' CHANGELOG.md)
-TARGET = AvatarDresser-$(VERSION).unitypackage
+VERSION = $(shell awk '/^v[0-9]/ {print substr($$1, 2); exit }' CHANGELOG.md)
+TARGET = AvatarDresser-v$(VERSION).unitypackage
 
 all: build
 
@@ -7,10 +7,12 @@ version:
 	@echo $(VERSION)
 
 Editor/Version.cs: CHANGELOG.md
-	@sed -i 's/VERSION = ".*"/VERSION = "$(VERSION)"/' $@
+	@sed -i 's/VERSION = ".*"/VERSION = "v$(VERSION)"/' $@
 
+package.json: .package.json.tmpl CHANGELOG.md
+	env VERSION=$(VERSION) envsubst < $< > $@
 
-$(TARGET): Editor/Version.cs
+$(TARGET): Editor/Version.cs package.json
 	# copy stuff to a tempdir to build our release tree
 	mkdir -p .tmp/Assets/SophieBlue/AvatarDresser
 	ls | grep -v "Assets" | xargs -i{} cp -a {} .tmp/Assets/SophieBlue/AvatarDresser/
