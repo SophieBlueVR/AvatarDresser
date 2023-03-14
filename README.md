@@ -41,18 +41,13 @@ file.
 
 ### VPM
 
-You can use now [VRChat's VPM tool](https://vcc.docs.vrchat.com/vpm/cli/)!
+You can also use [VRChat's VPM tool](https://vcc.docs.vrchat.com/vpm/cli/)!
 First add my [VPM Repository](https://github.com/SophieBlueVR/vpm-repos), and
 then you can simply go to your project directory and type:
 
 ```
-vpm add package io.github.SophieBlueVR.AvatarDresser
+vpm add package io.github.sophiebluevr.avatardresser
 ```
-
-**NOTE**: I distribute this tool inside the unitypackage for all of my avatar
-assets, so if you use the VPM method you must make sure you *exclude* the
-AvatarDresser when importing another unitypackage, or the two packages will
-conflict, and Unity will be sad.
 
 ## License
 

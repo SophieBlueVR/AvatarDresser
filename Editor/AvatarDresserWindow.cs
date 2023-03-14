@@ -15,7 +15,7 @@ using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 
 
-namespace SophieBlue.AvatarDresser {
+namespace SophieBlue.AvatarDresser.Editor {
     public class AvatarDresserWindow : EditorWindow
     {
         private Vector2 scroll;

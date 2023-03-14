@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace SophieBlue.AvatarDresser {
+namespace SophieBlue.AvatarDresser.Editor {
     [UsedImplicitly]
     internal static class Version
     {

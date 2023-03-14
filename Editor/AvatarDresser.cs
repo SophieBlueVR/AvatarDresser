@@ -16,7 +16,7 @@ using UnityEngine.Animations;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 
-namespace SophieBlue.AvatarDresser {
+namespace SophieBlue.AvatarDresser.Editor {
 
     [ExecuteInEditMode]
     public class AvatarDresser {
