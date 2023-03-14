@@ -19,8 +19,8 @@ jobs:
       - name: Get Details
         id: details
         run: |
-          version=$(awk '/^[0-9]/ { print $1; exit }' CHANGELOG.md)
-          echo "version=v${version}" >> $GITHUB_ENV
+          version=$(awk '/^v[0-9]/ { print $1; exit }' CHANGELOG.md)
+          echo "version=${version}" >> $GITHUB_ENV
           grep -zPo -e "(?s)${version}.*?\n-*?\n\n.*?\n\n" CHANGELOG.md | tail -n +3 >> .release_notes
 
       - name: Setup Package
@@ -35,20 +35,20 @@ jobs:
       - name: Create Unity Package
         uses: pCYSl5EDgo/create-unitypackage@master
         with:
-          package-path: 'AvatarDresser-v${{ env.version }}.unitypackage'
+          package-path: 'AvatarDresser-${{ env.version }}.unitypackage'
           include-files: metaList
 
       - name: Create Zipfile
         run: |
-          zip -r AvatarDresser-v${{ env.version }}.zip * -x AvatarDresser-v${{ env.version }}.unitypackage
+          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "AvatarDresser v${{ env.version }}"
+          name: "AvatarDresser ${{ env.version }}"
           body_path: .release_notes
           files: |
-            AvatarDresser-v${{ env.version }}.unitypackage
-            AvatarDresser-v${{ env.version }}.zip
+            AvatarDresser-${{ env.version }}.unitypackage
+            AvatarDresser-${{ env.version }}.zip
