@@ -32,11 +32,15 @@ jobs:
           .github/workflows/generate_meta.sh 35463f4647344b07b00095724986cf0a > Assets/SophieBlue/AvatarDresser.meta
           find Assets -type f -name \*.meta >> metaList
 
-      - name: Create package
+      - name: Create Unity Package
         uses: pCYSl5EDgo/create-unitypackage@master
         with:
           package-path: 'AvatarDresser-${{ env.version }}.unitypackage'
           include-files: metaList
+
+      - name: Create Zipfile
+        run: |
+          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -47,3 +51,4 @@ jobs:
           body_path: .release_notes
           files: |
             AvatarDresser-${{ env.version }}.unitypackage
+            AvatarDresser-${{ env.version }}.zip

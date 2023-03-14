@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.9
+------
+
+* Updating package files to work with VPM repository
+
 v0.1.8
 ------
 
