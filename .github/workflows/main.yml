@@ -23,11 +23,15 @@ jobs:
           echo "version=${version}" >> $GITHUB_ENV
           grep -zPo -e "(?s)${version}.*?\n-*?\n\n.*?\n\n" CHANGELOG.md | tail -n +3 >> .release_notes
 
+      - name: Create Zipfile
+        run: |
+          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage
+
       - name: Setup Package
         run: |
           TARGET=Assets/SophieBlue/AvatarDresser
           mkdir -p $TARGET
-          ls | grep -v "Assets" | xargs -i{} mv {} $TARGET
+          ls | grep -ve "\(Assets\|zip\)" | xargs -i{} mv {} $TARGET
           .github/workflows/generate_meta.sh bc846a2331c27846b961e0f9fe107d54 > Assets/SophieBlue.meta
           .github/workflows/generate_meta.sh 35463f4647344b07b00095724986cf0a > Assets/SophieBlue/AvatarDresser.meta
           find Assets -type f -name \*.meta >> metaList
@@ -37,10 +41,6 @@ jobs:
         with:
           package-path: 'AvatarDresser-${{ env.version }}.unitypackage'
           include-files: metaList
-
-      - name: Create Zipfile
-        run: |
-          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
