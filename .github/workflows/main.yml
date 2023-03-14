@@ -25,7 +25,7 @@ jobs:
 
       - name: Create Zipfile
         run: |
-          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage
+          zip -r AvatarDresser-${{ env.version }}.zip * -x AvatarDresser-${{ env.version }}.unitypackage -x Makefile
 
       - name: Setup Package
         run: |
