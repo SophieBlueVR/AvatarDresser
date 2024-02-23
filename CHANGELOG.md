@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.10
+-------
+
+* Updated readme, package.json for new VPM repo information
+
 v0.1.9
 ------
 

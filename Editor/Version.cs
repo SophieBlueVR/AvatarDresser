@@ -4,6 +4,6 @@ namespace SophieBlue.AvatarDresser.Editor {
     [UsedImplicitly]
     internal static class Version
     {
-        [UsedImplicitly] public const string VERSION = "v0.1.9";
+        [UsedImplicitly] public const string VERSION = "v0.1.10";
     }
 }
