@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.11
+-------
+
+* Remove incorrect removal of `SophieBlue` legacy folder
+
 v0.1.10
 -------
 
