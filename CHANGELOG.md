@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.12
+-------
+
+* Fix SDK version requirements to allow 3.5+
+
 v0.1.11
 -------
 
