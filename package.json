@@ -1,10 +1,10 @@
 {
     "name": "io.github.sophiebluevr.avatardresser",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "displayName": "Sophie's Avatar Dresser",
     "description": "A simple tool for adding accessories to a VRChat avatar",
     "type": "tool",
-    "unity": "2019.4",
+    "unity": "2022.3",
     "hideInEditor": "false",
     "author": {
         "name": "SophieBlue",
@@ -14,12 +14,12 @@
     "changelogUrl": "https://github.com/SophieBlueVR/AvatarDresser/blob/main/CHANGELOG.md",
     "licenseUrl": "https://github.com/SophieBlueVR/AvatarDresser/blob/main/LICENSE.txt",
     "license": "MIT",
-    "url": "https://github.com/SophieBlueVR/AvatarDresser/releases/download/v0.1.12/AvatarDresser-v0.1.12.zip",
+    "url": "https://github.com/SophieBlueVR/AvatarDresser/releases/download/v0.1.13/AvatarDresser-v0.1.13.zip",
     "repo": "https://sophiebluevr.github.io/vpm/index.json",
     "legacyFolders" : {
         "Assets\\SophieBlue\\AvatarDresser": "35463f4647344b07b00095724986cf0a"
     },
     "vpmDependencies": {
-        "com.vrchat.avatars": "3.x"
+        "com.vrchat.avatars": "^3.1.0"
     }
 }

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.13
+-------
+
+* Broaden SDK version requirement
+
 v0.1.12
 -------
 
